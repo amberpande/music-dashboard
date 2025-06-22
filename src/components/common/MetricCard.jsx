@@ -2,19 +2,16 @@ import React from 'react';
 import styled from 'styled-components';
 
 const CardContainer = styled.div`
-  background: var(--bg-primary);
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
   border: 1px solid var(--border-color);
-  border-radius: 0.75rem;
-  padding: 1.5rem;
-  box-shadow: var(--shadow-sm);
-  transition: all 0.3s ease;
+  border-radius: var(--radius-2xl);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-lg);
+  transition: all var(--transition-normal);
   position: relative;
   overflow: hidden;
-  
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-  }
+  cursor: ${props => props.onClick ? 'pointer' : 'default'};
   
   &::before {
     content: '';
@@ -22,8 +19,37 @@ const CardContainer = styled.div`
     top: 0;
     left: 0;
     right: 0;
-    height: 4px;
-    background: ${props => props.color || 'var(--accent-color)'};
+    height: 3px;
+    background: ${props => {
+      if (props.color) return props.color;
+      return 'var(--gradient-primary)';
+    }};
+    border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+  }
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+      radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.05) 0%, transparent 50%),
+      radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.05) 0%, transparent 50%);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity var(--transition-normal);
+  }
+  
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+    border-color: var(--border-hover);
+  }
+  
+  &:hover::after {
+    opacity: 1;
   }
 `;
 
@@ -31,70 +57,117 @@ const CardHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-4);
 `;
 
 const IconContainer = styled.div`
   font-size: 2rem;
   opacity: 0.8;
+  filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.3));
+  transition: all var(--transition-normal);
+  
+  ${CardContainer}:hover & {
+    opacity: 1;
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 15px rgba(139, 92, 246, 0.5));
+  }
+`;
+
+const TitleSection = styled.div`
+  flex: 1;
 `;
 
 const Title = styled.h3`
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   font-weight: 600;
   color: var(--text-secondary);
   margin: 0;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  flex: 1;
+  letter-spacing: 0.05em;
+  font-family: var(--font-family-display);
 `;
 
 const ValueContainer = styled.div`
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--space-3);
 `;
 
 const Value = styled.div`
-  font-size: 2.5rem;
+  font-size: clamp(2rem, 4vw, 2.75rem);
   font-weight: 700;
   color: var(--text-primary);
   line-height: 1;
-  margin-bottom: 0.25rem;
+  margin-bottom: var(--space-2);
+  font-family: var(--font-family-display);
+  letter-spacing: -0.025em;
   
   @media (max-width: 576px) {
-    font-size: 2rem;
+    font-size: clamp(1.5rem, 3.5vw, 2rem);
   }
 `;
 
 const DeltaContainer = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-2);
   flex-wrap: wrap;
 `;
 
 const Delta = styled.span`
   font-size: 0.875rem;
   font-weight: 600;
-  color: ${props => {
-    if (props.deltaColor === 'normal') return 'var(--success-color)';
-    if (props.deltaColor === 'inverse') return 'var(--error-color)';
-    if (props.deltaColor === 'off') return 'var(--warning-color)';
-    return 'var(--text-secondary)';
-  }};
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-normal);
+  
+  ${props => {
+    if (props.deltaColor === 'normal') {
+      return `
+        color: var(--success-color);
+        background: rgba(16, 185, 129, 0.1);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+      `;
+    }
+    if (props.deltaColor === 'inverse') {
+      return `
+        color: var(--error-color);
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+      `;
+    }
+    if (props.deltaColor === 'off') {
+      return `
+        color: var(--warning-color);
+        background: rgba(245, 158, 11, 0.1);
+        border: 1px solid rgba(245, 158, 11, 0.2);
+      `;
+    }
+    return `
+      color: var(--text-secondary);
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+    `;
+  }}
 `;
 
 const HelpText = styled.div`
   font-size: 0.8rem;
   color: var(--text-muted);
-  margin-top: 0.5rem;
+  margin-top: var(--space-3);
   line-height: 1.4;
+  background: var(--bg-secondary);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-lg);
+  border-left: 3px solid var(--border-color);
 `;
 
 const TrendIndicator = styled.span`
   font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  
   &::before {
     content: ${props => {
       if (props.deltaColor === 'normal') return "'▲'";
@@ -102,13 +175,14 @@ const TrendIndicator = styled.span`
       if (props.deltaColor === 'off') return "'⚠️'";
       return "'━'";
     }};
+    margin-right: var(--space-1);
   }
 `;
 
 const StatusBadge = styled.div`
   position: absolute;
-  top: 1rem;
-  right: 1rem;
+  top: var(--space-4);
+  right: var(--space-4);
   width: 12px;
   height: 12px;
   border-radius: 50%;
@@ -118,11 +192,66 @@ const StatusBadge = styled.div`
     if (props.status === 'poor') return 'var(--error-color)';
     return 'var(--text-muted)';
   }};
-  animation: ${props => props.animated ? 'pulse 2s infinite' : 'none'};
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
   
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
+  ${props => props.animated && `
+    animation: statusPulse 2s infinite;
+    
+    @keyframes statusPulse {
+      0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+      50% {
+        opacity: 0.7;
+        transform: scale(1.1);
+      }
+    }
+  `}
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border-radius: 50%;
+    background: inherit;
+    opacity: 0.3;
+    animation: ${props => props.animated ? 'statusRipple 2s infinite' : 'none'};
+  }
+  
+  @keyframes statusRipple {
+    0% {
+      opacity: 0.3;
+      transform: scale(1);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(2);
+    }
+  }
+`;
+
+const GradientOverlay = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    transparent 0%,
+    rgba(139, 92, 246, 0.02) 50%,
+    transparent 100%
+  );
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--transition-normal);
+  
+  ${CardContainer}:hover & {
+    opacity: 1;
   }
 `;
 
@@ -155,10 +284,13 @@ const MetricCard = ({
     <CardContainer 
       color={color} 
       onClick={onClick}
-      style={{ cursor: onClick ? 'pointer' : 'default' }}
     >
+      <GradientOverlay />
+      
       <CardHeader>
-        <Title>{title}</Title>
+        <TitleSection>
+          <Title>{title}</Title>
+        </TitleSection>
         {icon && <IconContainer>{icon}</IconContainer>}
       </CardHeader>
       
