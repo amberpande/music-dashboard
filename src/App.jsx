@@ -10,6 +10,9 @@ import StatusBar from './components/common/StatusBar';
 import OverviewTab from './components/tabs/OverviewTab';
 import ArtistAnalyticsTab from './components/tabs/ArtistAnalyticsTab';
 import SearchTab from './components/tabs/SearchTab';
+import DatabaseFixesTab from './components/tabs/DatabaseFixesTab';
+import SchemaPerformanceTab from './components/tabs/SchemaPerformanceTab';
+import BusinessIntelligenceTab from './components/tabs/BusinessIntelligenceTab';
 
 // Styles
 import './styles/globals.css';
@@ -217,38 +220,17 @@ function App() {
 
             {/* Database Fixes Tab */}
             <TabPanel>
-              <PlaceholderContent>
-                <div className="icon">🔧</div>
-                <h3>Database Fixes & Deduplication</h3>
-                <p>
-                  Database repair operations and AI-enhanced deduplication tools
-                  will be implemented in Batch 6-7.
-                </p>
-              </PlaceholderContent>
+              <DatabaseFixesTab refreshTrigger={refreshTrigger} />
             </TabPanel>
 
             {/* Schema & Performance Tab */}
             <TabPanel>
-              <PlaceholderContent>
-                <div className="icon">🏗️</div>
-                <h3>Schema, Architecture & Performance</h3>
-                <p>
-                  Database schema visualization and performance monitoring
-                  will be implemented in Batch 8.
-                </p>
-              </PlaceholderContent>
+              <SchemaPerformanceTab refreshTrigger={refreshTrigger} />
             </TabPanel>
 
             {/* Business Intelligence Tab */}
             <TabPanel>
-              <PlaceholderContent>
-                <div className="icon">📈</div>
-                <h3>Business Intelligence & Strategic Analytics</h3>
-                <p>
-                  Advanced analytics and business intelligence features
-                  will be implemented in Batch 9.
-                </p>
-              </PlaceholderContent>
+              <BusinessIntelligenceTab refreshTrigger={refreshTrigger} />
             </TabPanel>
           </Tabs>
         </TabsContainer>
