@@ -63,7 +63,7 @@ const TabsContainer = styled.div`
     margin: 0 0 var(--space-8) 0 !important;
     padding: 0 !important;
     display: flex !important;
-    flex-wrap: wrap !important;
+    flex-wrap: nowrap !important;
     gap: var(--space-2) !important;
     background: var(--bg-card) !important;
     border-radius: var(--radius-2xl) !important;
@@ -71,12 +71,11 @@ const TabsContainer = styled.div`
     backdrop-filter: blur(16px) !important;
     box-shadow: var(--shadow-lg) !important;
     border: 1px solid var(--border-color) !important;
-    
-    @media (max-width: 768px) {
-      justify-content: center !important;
-      padding: var(--space-1) !important;
-      gap: var(--space-1) !important;
-    }
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    white-space: nowrap !important;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-color) var(--bg-secondary);
   }
   
   .react-tabs__tab {
@@ -143,14 +142,11 @@ const TabsContainer = styled.div`
     padding-top: var(--space-4) !important;
   }
   
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
+  @media (max-width: 768px) {
+    .react-tabs__tab-list {
+      justify-content: flex-start !important;
+      padding: var(--space-1) !important;
+      gap: var(--space-1) !important;
     }
   }
 `;

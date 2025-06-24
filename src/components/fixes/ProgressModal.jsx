@@ -186,7 +186,7 @@ const LogEntry = styled.div`
 const MetricsGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 1rem;
+  gap: 0.5rem;
   margin: 1.5rem 0;
 `;
 

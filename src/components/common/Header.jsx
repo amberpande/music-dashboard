@@ -258,9 +258,6 @@ const Header = ({ onRefresh, isLoading }) => {
             <TitleIcon>🎵</TitleIcon>
             Enhanced Music Database Dashboard
           </Title>
-          <Subtitle>
-            AI-powered comprehensive visualization, management, and deduplication of your music database
-          </Subtitle>
         </TitleSection>
         
         <ActionSection>

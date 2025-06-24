@@ -6,7 +6,7 @@ const CardContainer = styled.div`
   backdrop-filter: blur(16px);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-2xl);
-  padding: var(--space-6);
+  padding: var(--space-4);
   box-shadow: var(--shadow-lg);
   transition: all var(--transition-normal);
   position: relative;
@@ -92,7 +92,7 @@ const ValueContainer = styled.div`
 `;
 
 const Value = styled.div`
-  font-size: clamp(2rem, 4vw, 2.75rem);
+  font-size: clamp(1.2rem, 3vw, 2rem);
   font-weight: 700;
   color: var(--text-primary);
   line-height: 1;
@@ -101,7 +101,7 @@ const Value = styled.div`
   letter-spacing: -0.025em;
   
   @media (max-width: 576px) {
-    font-size: clamp(1.5rem, 3.5vw, 2rem);
+    font-size: clamp(1rem, 2.5vw, 1.5rem);
   }
 `;
 
