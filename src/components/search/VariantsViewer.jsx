@@ -233,6 +233,9 @@ const VariantsViewer = ({ type, itemId, itemName, onClose }) => {
     }
   }, [itemId, type]);
 
+  // Defensive checks for missing data
+  const safeArray = (arr) => Array.isArray(arr) ? arr : [];
+
   if (loading) {
     return (
       <ViewerContainer>
@@ -287,11 +290,20 @@ const VariantsViewer = ({ type, itemId, itemName, onClose }) => {
   }
 
   const renderSongVariants = () => {
+    if (!data) {
+      return (
+        <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem' }}>
+          <h4>No variant data available for this song.</h4>
+        </div>
+      );
+    }
+    const aliases = safeArray(data.aliases);
+    const sibling_songs = safeArray(data.sibling_songs);
     const [originalId, originalSong, originalArtist, canonicalId] = data.original;
     
     const tabs = [
-      { id: 'aliases', label: '🏷️ Direct Aliases', count: data.aliases.length },
-      { id: 'related', label: '👥 Related Songs', count: data.sibling_songs.length },
+      { id: 'aliases', label: '🏷️ Direct Aliases', count: aliases.length },
+      { id: 'related', label: '👥 Related Songs', count: sibling_songs.length },
       { id: 'summary', label: '📋 Summary', count: null }
     ];
 
@@ -338,9 +350,9 @@ const VariantsViewer = ({ type, itemId, itemName, onClose }) => {
           {activeTab === 'aliases' && (
             <div>
               <h4 style={{ margin: '0 0 1rem 0' }}>Direct Aliases</h4>
-              {data.aliases.length > 0 ? (
+              {aliases.length > 0 ? (
                 <VariantsList>
-                  {data.aliases.map(([alias, type], index) => (
+                  {aliases.map(([alias, type], index) => (
                     <VariantItem key={index}>
                       <VariantText>
                         <VariantName>{alias}</VariantName>
@@ -361,9 +373,9 @@ const VariantsViewer = ({ type, itemId, itemName, onClose }) => {
           {activeTab === 'related' && (
             <div>
               <h4 style={{ margin: '0 0 1rem 0' }}>Related Songs</h4>
-              {data.sibling_songs.length > 0 ? (
+              {sibling_songs.length > 0 ? (
                 <RelatedItemsList>
-                  {data.sibling_songs.map(([id, song, artist, relation], index) => (
+                  {sibling_songs.map(([id, song, artist, relation], index) => (
                     <RelatedItem key={index}>
                       <div>
                         <VariantName>{song}</VariantName>
@@ -389,15 +401,15 @@ const VariantsViewer = ({ type, itemId, itemName, onClose }) => {
               <h4 style={{ margin: '0 0 1rem 0' }}>Summary</h4>
               <SummaryGrid>
                 <SummaryCard>
-                  <SummaryValue>{data.aliases.length}</SummaryValue>
+                  <SummaryValue>{aliases.length}</SummaryValue>
                   <SummaryLabel>Direct Aliases</SummaryLabel>
                 </SummaryCard>
                 <SummaryCard>
-                  <SummaryValue>{data.sibling_songs.length}</SummaryValue>
+                  <SummaryValue>{sibling_songs.length}</SummaryValue>
                   <SummaryLabel>Related Songs</SummaryLabel>
                 </SummaryCard>
                 <SummaryCard>
-                  <SummaryValue>{data.aliases.length + data.sibling_songs.length + 1}</SummaryValue>
+                  <SummaryValue>{aliases.length + sibling_songs.length + 1}</SummaryValue>
                   <SummaryLabel>Total Variants</SummaryLabel>
                 </SummaryCard>
               </SummaryGrid>
@@ -406,10 +418,10 @@ const VariantsViewer = ({ type, itemId, itemName, onClose }) => {
                 <h5>All Variants:</h5>
                 <ul style={{ margin: '0.5rem 0', paddingLeft: '1.5rem' }}>
                   <li><strong>{originalSong}</strong> (Original)</li>
-                  {data.aliases.map(([alias], index) => (
+                  {aliases.map(([alias], index) => (
                     <li key={index}>• {alias}</li>
                   ))}
-                  {data.sibling_songs.map(([, song, artist], index) => (
+                  {sibling_songs.map(([, song, artist], index) => (
                     <li key={index}>→ {song} by {artist} (related)</li>
                   ))}
                 </ul>
@@ -422,12 +434,21 @@ const VariantsViewer = ({ type, itemId, itemName, onClose }) => {
   };
 
   const renderArtistVariants = () => {
+    if (!data) {
+      return (
+        <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem' }}>
+          <h4>No variant data available for this artist.</h4>
+        </div>
+      );
+    }
+    const aliases = safeArray(data.aliases);
+    const sample_songs = safeArray(data.sample_songs);
     const [originalId, originalName] = data.original;
     const [totalSongs, primarySongs, featuredSongs] = data.song_stats;
     
     const tabs = [
-      { id: 'aliases', label: '🏷️ Aliases', count: data.aliases.length },
-      { id: 'songs', label: '🎵 Sample Songs', count: data.sample_songs.length },
+      { id: 'aliases', label: '🏷️ Aliases', count: aliases.length },
+      { id: 'songs', label: '🎵 Sample Songs', count: sample_songs.length },
       { id: 'summary', label: '📋 Summary', count: null }
     ];
 
@@ -476,9 +497,9 @@ const VariantsViewer = ({ type, itemId, itemName, onClose }) => {
           {activeTab === 'aliases' && (
             <div>
               <h4 style={{ margin: '0 0 1rem 0' }}>Artist Aliases</h4>
-              {data.aliases.length > 0 ? (
+              {aliases.length > 0 ? (
                 <VariantsList>
-                  {data.aliases.map(([alias, type], index) => (
+                  {aliases.map(([alias, type], index) => (
                     <VariantItem key={index}>
                       <VariantText>
                         <VariantName>{alias}</VariantName>
@@ -499,9 +520,9 @@ const VariantsViewer = ({ type, itemId, itemName, onClose }) => {
           {activeTab === 'songs' && (
             <div>
               <h4 style={{ margin: '0 0 1rem 0' }}>Sample Songs</h4>
-              {data.sample_songs.length > 0 ? (
+              {sample_songs.length > 0 ? (
                 <RelatedItemsList>
-                  {data.sample_songs.map(([id, song, isPrimary], index) => (
+                  {sample_songs.map(([id, song, isPrimary], index) => (
                     <RelatedItem key={index}>
                       <div>
                         <VariantName>{song}</VariantName>
@@ -522,7 +543,7 @@ const VariantsViewer = ({ type, itemId, itemName, onClose }) => {
                 </EmptyState>
               )}
               
-              {data.sample_songs.length === 10 && (
+              {sample_songs.length === 10 && (
                 <div style={{ textAlign: 'center', marginTop: '1rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
                   Showing first 10 songs. This artist may have more songs.
                 </div>
@@ -535,7 +556,7 @@ const VariantsViewer = ({ type, itemId, itemName, onClose }) => {
               <h4 style={{ margin: '0 0 1rem 0' }}>Summary</h4>
               <SummaryGrid>
                 <SummaryCard>
-                  <SummaryValue>{data.aliases.length}</SummaryValue>
+                  <SummaryValue>{aliases.length}</SummaryValue>
                   <SummaryLabel>Aliases</SummaryLabel>
                 </SummaryCard>
                 <SummaryCard>
@@ -556,7 +577,7 @@ const VariantsViewer = ({ type, itemId, itemName, onClose }) => {
                 <h5>All Variants:</h5>
                 <ul style={{ margin: '0.5rem 0', paddingLeft: '1.5rem' }}>
                   <li><strong>{originalName}</strong> (Original)</li>
-                  {data.aliases.map(([alias], index) => (
+                  {aliases.map(([alias], index) => (
                     <li key={index}>• {alias}</li>
                   ))}
                 </ul>

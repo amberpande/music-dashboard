@@ -13,8 +13,7 @@ import {
   fetchTopArtists,
   fetchDistributionData,
   fetchYearDistribution,
-  fetchTopGenres,
-  simulateNetworkError 
+  fetchTopGenres
 } from '../../services/mockData';
 
 const BIContainer = styled.div`
@@ -234,8 +233,6 @@ const BusinessIntelligenceTab = ({ refreshTrigger }) => {
     setError(null);
     
     try {
-      simulateNetworkError();
-      
       const [
         stats,
         secondaryStats,
@@ -490,23 +487,15 @@ const BusinessIntelligenceTab = ({ refreshTrigger }) => {
 
       <SectionTitle>📈 Performance Analytics</SectionTitle>
       
-      {topArtists.length > 0 && (
-        <TopArtistsChart topArtists={topArtists} />
-      )}
-      
-      {(distributionData.artistsPerSong.length > 0 || distributionData.songsPerArtist.length > 0) && (
-        <DistributionCharts 
-          artistsPerSong={distributionData.artistsPerSong}
-          songsPerArtist={distributionData.songsPerArtist}
-        />
-      )}
-      
-      {(yearDistribution.length > 0 || topGenres.length > 0) && (
-        <YearGenreCharts 
-          yearDistribution={yearDistribution}
-          topGenres={topGenres}
-        />
-      )}
+      <TopArtistsChart topArtists={topArtists} />
+      <DistributionCharts 
+        artistsPerSong={distributionData.artistsPerSong}
+        songsPerArtist={distributionData.songsPerArtist}
+      />
+      <YearGenreCharts 
+        yearDistribution={yearDistribution}
+        topGenres={topGenres}
+      />
 
       <SectionTitle>💡 Strategic Recommendations</SectionTitle>
       

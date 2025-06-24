@@ -4,8 +4,7 @@ import MetricCard from '../common/MetricCard';
 import LoadingSpinner from '../common/LoadingSpinner';
 import { 
   fetchDatabaseStats, 
-  fetchDeduplicationStats,
-  simulateNetworkError 
+  fetchDeduplicationStats
 } from '../../services/mockData';
 
 const SchemaContainer = styled.div`
@@ -241,8 +240,6 @@ const SchemaPerformanceTab = ({ refreshTrigger }) => {
     setError(null);
     
     try {
-      simulateNetworkError();
-      
       const [stats, dedupStats] = await Promise.all([
         fetchDatabaseStats(),
         fetchDeduplicationStats()

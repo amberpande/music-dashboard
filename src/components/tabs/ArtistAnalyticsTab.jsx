@@ -2,28 +2,22 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import MetricCard from '../common/MetricCard';
 import LoadingSpinner from '../common/LoadingSpinner';
+import TopArtistsBarChart from '../charts/TopArtistsBarChart';
+import ArtistProductivityOverTimeChart from '../charts/ArtistProductivityOverTimeChart';
+import ArtistAliasesPieChart from '../charts/ArtistAliasesPieChart';
 import { 
   fetchDatabaseStats, 
   fetchSecondaryArtistStats, 
   fetchTopArtists,
-  fetchDistributionData,
   fetchYearDistribution,
   fetchTopGenres,
-  simulateNetworkError 
 } from '../../services/mockData';
 
 const AnalyticsContainer = styled.div`
   animation: fadeIn 0.3s ease-in-out;
-  
   @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 `;
 
@@ -35,10 +29,7 @@ const SectionTitle = styled.h2`
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  
-  &:first-child {
-    margin-top: 0;
-  }
+  &:first-child { margin-top: 0; }
 `;
 
 const MetricsGrid = styled.div`
@@ -46,7 +37,6 @@ const MetricsGrid = styled.div`
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 1rem;
   margin-bottom: 2rem;
-  
   @media (max-width: 768px) {
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     gap: 0.5rem;
@@ -77,21 +67,6 @@ const AlertCard = styled.div`
   }};
 `;
 
-const PlaceholderChart = styled.div`
-  background: var(--bg-secondary);
-  border: 2px dashed var(--border-color);
-  border-radius: 0.75rem;
-  padding: 3rem 2rem;
-  text-align: center;
-  color: var(--text-secondary);
-  margin: 2rem 0;
-  
-  .icon {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-  }
-`;
-
 const TopArtistsList = styled.div`
   background: var(--bg-primary);
   border: 1px solid var(--border-color);
@@ -107,19 +82,34 @@ const ArtistItem = styled.div`
   padding: 0.75rem 0;
   border-bottom: 1px solid var(--border-color);
   align-items: center;
-  
-  &:last-child {
-    border-bottom: none;
-  }
-  
+  &:last-child { border-bottom: none; }
   @media (max-width: 768px) {
     grid-template-columns: auto 1fr auto;
     gap: 0.5rem;
-    
-    .hide-mobile {
-      display: none;
-    }
+    .hide-mobile { display: none; }
   }
+`;
+
+const CollabTable = styled.table`
+  width: 100%;
+  margin: 2rem 0;
+  border-collapse: collapse;
+  background: var(--bg-primary);
+  border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  th, td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+    text-align: left;
+  }
+  th {
+    background: var(--bg-secondary);
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+  }
+  tr:last-child td { border-bottom: none; }
 `;
 
 const ArtistAnalyticsTab = ({ refreshTrigger }) => {
@@ -129,45 +119,39 @@ const ArtistAnalyticsTab = ({ refreshTrigger }) => {
     stats: {},
     secondaryStats: {},
     topArtists: [],
-    distributionData: { artistsPerSong: [], songsPerArtist: [] },
     yearDistribution: [],
     topGenres: []
   });
 
+  // Simulated: In real app, fetch from backend
+  const [aliasStats, setAliasStats] = useState({ withAliases: 0, withoutAliases: 0 });
+  const [productivityData, setProductivityData] = useState([]);
+  const [mostCollaborative, setMostCollaborative] = useState([]);
+
   const loadData = async () => {
     setLoading(true);
     setError(null);
-    
     try {
-      // Simulate network check
-      simulateNetworkError();
-      
-      // Fetch all data in parallel
-      const [
-        stats, 
-        secondaryStats, 
-        topArtists, 
-        distributionData,
-        yearDistribution,
-        topGenres
-      ] = await Promise.all([
+      const [stats, secondaryStats, topArtists, yearDistribution, topGenres] = await Promise.all([
         fetchDatabaseStats(),
         fetchSecondaryArtistStats(),
         fetchTopArtists(),
-        fetchDistributionData(),
         fetchYearDistribution(),
         fetchTopGenres()
       ]);
-      
-      setData({
-        stats,
-        secondaryStats,
-        topArtists,
-        distributionData,
-        yearDistribution,
-        topGenres
-      });
-      
+      setData({ stats, secondaryStats, topArtists, yearDistribution, topGenres });
+
+      // Calculate alias stats
+      const withAliases = stats.artist_aliases || 0;
+      const withoutAliases = (stats.artists || 0) - withAliases;
+      setAliasStats({ withAliases, withoutAliases });
+
+      // Productivity data: count of new artists per year
+      // (Assume yearDistribution is [{year, count}] for artists)
+      setProductivityData(yearDistribution);
+
+      // Most collaborative artists: sort by featured_count
+      setMostCollaborative([...topArtists].sort((a, b) => b.featured_count - a.featured_count).slice(0, 5));
     } catch (err) {
       setError(err.message);
     } finally {
@@ -175,9 +159,7 @@ const ArtistAnalyticsTab = ({ refreshTrigger }) => {
     }
   };
 
-  useEffect(() => {
-    loadData();
-  }, [refreshTrigger]);
+  useEffect(() => { loadData(); }, [refreshTrigger]);
 
   if (loading) {
     return (
@@ -189,7 +171,6 @@ const ArtistAnalyticsTab = ({ refreshTrigger }) => {
       />
     );
   }
-
   if (error) {
     return (
       <AlertCard type="danger">
@@ -205,118 +186,47 @@ const ArtistAnalyticsTab = ({ refreshTrigger }) => {
       </AlertCard>
     );
   }
-
   const { stats, secondaryStats, topArtists } = data;
-
   return (
     <AnalyticsContainer>
-      <SectionTitle>🎤 Comprehensive Artist Analytics</SectionTitle>
-
-      <SectionTitle>📊 Artist Performance Overview</SectionTitle>
+      <SectionTitle>🎤 Artist Metrics Overview</SectionTitle>
       <MetricsGrid>
-        <MetricCard
-          title="Total Artists"
-          value={stats.artists}
-          icon="🎤"
-          color="var(--accent-color)"
-          help="Total number of unique artists in the database"
-        />
-        <MetricCard
-          title="Artist Aliases"
-          value={stats.artist_aliases}
-          icon="🏷️"
-          color="var(--success-color)"
-          help="Total artist aliases for better search and matching"
-        />
-        <MetricCard
-          title="Primary Relationships"
-          value={stats.primary_artists}
-          icon="🎯"
-          color="var(--primary-color)"
-          help="Songs where artists appear as primary performer"
-        />
-        <MetricCard
-          title="Featured Relationships"
-          value={stats.featured_artists}
-          icon="🎼"
-          color="var(--warning-color)"
-          help="Songs where artists appear as featured performer"
-        />
+        <MetricCard title="Total Artists" value={stats.artists} icon="🎤" color="var(--accent-color)" help="Total number of unique artists in the database" />
+        <MetricCard title="Artist Aliases" value={stats.artist_aliases} icon="🏷️" color="var(--success-color)" help="Total artist aliases for better search and matching" />
+        <MetricCard title="Most Prolific Artist" value={topArtists[0]?.name || '-'} icon="🏆" color="var(--primary-color)" help="Artist with the most songs" />
+        <MetricCard title="Most Collaborative Artist" value={mostCollaborative[0]?.name || '-'} icon="🤝" color="var(--warning-color)" help="Artist with the most featured appearances" />
       </MetricsGrid>
 
-      <SectionTitle>🎼 Secondary Artist Deep Dive</SectionTitle>
-      <MetricsGrid>
-        <MetricCard
-          title="Songs with Features"
-          value={secondaryStats.songs_with_secondary}
-          delta={`${((secondaryStats.songs_with_secondary / stats.songs) * 100).toFixed(1)}% of all songs`}
-          icon="🎵"
-          color="var(--accent-color)"
-          help="Songs containing secondary/featured artists"
-        />
-        <MetricCard
-          title="Unique Featured Artists"
-          value={secondaryStats.unique_secondary_count}
-          delta={`${(secondaryStats.total_secondary_mentions / secondaryStats.unique_secondary_count).toFixed(1)} avg mentions`}
-          icon="🎤"
-          color="var(--success-color)"
-          help="Distinct artists appearing as features"
-        />
-        <MetricCard
-          title="Feature Rate"
-          value={`${((secondaryStats.songs_with_secondary / stats.songs) * 100).toFixed(1)}%`}
-          delta={`${secondaryStats.songs_with_secondary.toLocaleString()} feature songs`}
-          icon="📈"
-          color="var(--primary-color)"
-          help="Percentage of songs that include featured artists"
-        />
-        <MetricCard
-          title="Avg Artists per Song"
-          value={((stats.song_artist_relations / stats.songs)).toFixed(1)}
-          delta="Including all collaborations"
-          icon="👥"
-          color="var(--warning-color)"
-          help="Average number of artists per song across all tracks"
-        />
-      </MetricsGrid>
+      <SectionTitle>🏆 Top 10 Artists (Primary vs Featured)</SectionTitle>
+      <TopArtistsBarChart topArtists={topArtists.slice(0, 10)} />
 
-      <SectionTitle>🏆 Top 10 Artists</SectionTitle>
-      <TopArtistsList>
-        <ArtistItem style={{ fontWeight: '600', borderBottom: '2px solid var(--border-color)' }}>
-          <div>#</div>
-          <div>Artist</div>
-          <div>Total</div>
-          <div className="hide-mobile">Primary</div>
-          <div className="hide-mobile">Featured</div>
-        </ArtistItem>
-        {topArtists.slice(0, 10).map((artist, index) => (
-          <ArtistItem key={artist.id}>
-            <div style={{ fontWeight: '600', color: 'var(--accent-color)' }}>
-              {index + 1}
-            </div>
-            <div style={{ fontWeight: '600', color: 'var(--text-primary)' }}>
-              {artist.name}
-            </div>
-            <div>{artist.song_count.toLocaleString()}</div>
-            <div className="hide-mobile">{artist.primary_count.toLocaleString()}</div>
-            <div className="hide-mobile">{artist.featured_count.toLocaleString()}</div>
-          </ArtistItem>
-        ))}
-      </TopArtistsList>
+      <SectionTitle>📈 Artist Productivity Over Time</SectionTitle>
+      <ArtistProductivityOverTimeChart productivityData={productivityData} />
 
-      <PlaceholderChart>
-        <div className="icon">📊</div>
-        <h3>Interactive Charts Coming Soon!</h3>
-        <p>
-          Create the chart component files to see interactive Plotly.js visualizations:
-          <br />
-          • TopArtistsChart.jsx
-          <br />
-          • DistributionCharts.jsx  
-          <br />
-          • YearGenreCharts.jsx
-        </p>
-      </PlaceholderChart>
+      <SectionTitle>🏷️ Artists With vs Without Aliases</SectionTitle>
+      <ArtistAliasesPieChart aliasStats={aliasStats} />
+
+      <SectionTitle>🤝 Most Collaborative Artists</SectionTitle>
+      <CollabTable>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Artist</th>
+            <th>Total Songs</th>
+            <th>Featured Appearances</th>
+          </tr>
+        </thead>
+        <tbody>
+          {mostCollaborative.map((artist, idx) => (
+            <tr key={artist.id}>
+              <td>{idx + 1}</td>
+              <td>{artist.name}</td>
+              <td>{artist.song_count}</td>
+              <td>{artist.featured_count}</td>
+            </tr>
+          ))}
+        </tbody>
+      </CollabTable>
 
       {topArtists.length > 0 && (
         <AlertCard type="success">

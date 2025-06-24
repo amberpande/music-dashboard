@@ -6,8 +6,7 @@ import ProgressModal from '../fixes/ProgressModal';
 import { 
   fetchDatabaseIssues,
   fetchDatabaseStats,
-  fetchSecondaryArtistStats,
-  simulateNetworkError 
+  fetchSecondaryArtistStats
 } from '../../services/mockData';
 import { 
   executeFixOperation,
@@ -76,23 +75,35 @@ const MetricsGrid = styled.div`
 `;
 
 const FixOperationsGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  display: flex;
+  flex-wrap: nowrap;
   gap: 1.5rem;
   margin-bottom: 2rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
 `;
 
 const FixOperationCard = styled.div`
-  background: var(--bg-primary);
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
   border: 1px solid var(--border-color);
-  border-radius: 0.75rem;
-  padding: 1.5rem;
-  box-shadow: var(--shadow-sm);
-  transition: all 0.3s ease;
+  border-radius: var(--radius-2xl);
+  padding: var(--space-4);
+  box-shadow: var(--shadow-lg);
+  transition: all var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+  min-width: 180px;
+  max-width: 1fr;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
+    transform: translateY(-4px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+    border-color: var(--border-hover);
   }
 `;
 
@@ -305,8 +316,6 @@ const DatabaseFixesTab = ({ refreshTrigger }) => {
     setError(null);
     
     try {
-      simulateNetworkError();
-      
       const [issues, stats, secondaryStats] = await Promise.all([
         fetchDatabaseIssues(),
         fetchDatabaseStats(),

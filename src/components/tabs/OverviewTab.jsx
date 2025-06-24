@@ -8,8 +8,6 @@ import {
   fetchDeduplicationStats, 
   fetchDatabaseIssues,
   fetchRecentSongs,
-  calculateDatabaseHealth,
-  simulateNetworkError 
 } from '../../services/mockData';
 
 const OverviewContainer = styled.div`
@@ -144,9 +142,6 @@ const OverviewTab = ({ refreshTrigger }) => {
     setError(null);
     
     try {
-      // Simulate network check
-      simulateNetworkError();
-      
       // Fetch all data in parallel
       const [stats, secondaryStats, dedupStats, issues, recentSongs] = await Promise.all([
         fetchDatabaseStats(),
@@ -156,15 +151,13 @@ const OverviewTab = ({ refreshTrigger }) => {
         fetchRecentSongs()
       ]);
       
-      const healthScore = calculateDatabaseHealth(stats, issues);
-      
       setData({
         stats,
         secondaryStats,
         dedupStats,
         issues,
         recentSongs,
-        healthScore
+        healthScore: 0 // Placeholder for health score, actual implementation needed
       });
       
     } catch (err) {
